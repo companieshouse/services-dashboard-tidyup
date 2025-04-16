@@ -1,6 +1,6 @@
 import { Handler, Context } from 'aws-lambda';
 
-import {removeOldData} from "./coreLogic.js";
+import {deleteOldData} from "./coreLogic.js";
 import {logger, logErr} from "./utils/logger.js";
 import { isRunningInLambda } from "./utils/envUtils.js";
 
@@ -24,7 +24,7 @@ export const handler: Handler = async (
 
             // } else if (event.source === 'aws.events' && event['detail-type'] === 'Scheduled Event') {
             } else if (event.action === "delete") {
-                    await removeOldData();
+                    await deleteOldData();
             } else {
                 logger.info(`Unhandled action: ${event.action}`);
             }
@@ -38,5 +38,5 @@ export const handler: Handler = async (
 
 // normal main when running locally
 if (!isRunningInLambda()) {
-    removeOldData();
+    deleteOldData();
 }

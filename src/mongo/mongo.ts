@@ -1,25 +1,20 @@
-import { Db, MongoClient, PushOperator } from "mongodb";
+import { Db, MongoClient, Collection, PullAllOperator } from "mongodb";
 
 import { getEnvironmentValue, isRunningInLambda } from "../utils/envUtils.js";
 import * as config from "../config/index.js";
 import {logger, logErr} from "../utils/logger.js";
 import {getParamStore} from "../aws/ssm.js"
+import {DTVersion, UUIDsRecord} from "../deptrack/deptrack.js";
 
 let mongoClient: MongoClient;
-
 let database: Db;
+let collection: Collection;
+
 let defaultOldDate = "1970-01-01T00:00:00Z";
 
-interface DTVersion {
-   version: string;
-   uuid: string
-}
 interface EcsVersion {
    version: string;
 }
-
-type UUIDsRecord = Record<string, DTVersion[]>;
-
 
 async function init() {
    try {
@@ -34,6 +29,7 @@ async function init() {
       }
       await mongoClient.connect();
       database = mongoClient.db(config.MONGO_DB_NAME);
+      collection = database.collection(config.MONGO_COLLECTION_PROJECTS);
    }
    catch(error) {
       logErr(error, "Error connecting to Mongo:");
@@ -44,11 +40,12 @@ function close() {
    mongoClient.close();
 }
 
-async function tidyUp() {
+// get "old" versions, which means versions that:
+// - are not any of the ones deployed in cidev / staging / live
+// - are older than the config.MAX_RECENT_VERSIONS
+async function getOldUuids() {
    const uuids: UUIDsRecord = {};
    try {
-
-      const collection = database.collection(config.MONGO_COLLECTION_PROJECTS);
       const cursor = collection.find();
 
       while (await cursor.hasNext()) {
@@ -83,7 +80,32 @@ async function tidyUp() {
    }
    console.log(uuids);
    return uuids;
- }
+}
 
+// remove the old versions stored in MongoDB
+export async function deleteOldUuids(uuids: UUIDsRecord) {
+   try {
 
-export { init, close, tidyUp };
+   for (const [serviceName, versions] of Object.entries(uuids)) {
+      logger.info(`Removing old versions from [${serviceName}]`);
+      const uuidsToRemove = versions.map(v => v.uuid);
+
+      const result = await collection.updateOne(
+         { name: serviceName },
+         {
+            $pull: {
+               versions: {
+                  uuid: { $in: uuidsToRemove },
+               } as any,
+            },
+         }
+      );
+
+      logger.info(`Removed ${result.modifiedCount} entries`);
+   }
+   } catch (error) {
+      logErr(error, "Error while deleting old UUIDs:", );
+   }
+}
+
+export { init, close, getOldUuids };

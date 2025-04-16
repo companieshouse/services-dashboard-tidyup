@@ -1,12 +1,21 @@
 import * as config from "./config/index.js";
 import {logger, logErr} from "./utils/logger.js";
 import * as mongo from "./mongo/mongo.js";
+import {UUIDsRecord, deleteProjects}  from "./deptrack/deptrack.js";
 
-export async function removeOldData() {
+export async function deleteOldData() {
    try {
-        logger.info("fetching Old uuids ...");
         await mongo.init();
-        await mongo.tidyUp();
+
+        logger.info("Getting old uuids from Mongo...");
+        let uuids: UUIDsRecord = await mongo.getOldUuids();
+
+        logger.info("Deleting old uuids from Dep. Track...");
+        await deleteProjects(uuids);
+
+        logger.info("Deleting old uuids from Mongo...");
+        await mongo.deleteOldUuids(uuids);
+
     } catch (error) {
         logErr(error, "Error fetching uuids:");
     } finally {
