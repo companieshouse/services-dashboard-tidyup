@@ -13,17 +13,7 @@ export const handler: Handler = async (
     try {
         if (event) {
             logger.info(`hanlder triggered by received event:${JSON.stringify(event, null, 2)}`);
-            if (event.source === 'aws.ecs' && event['detail-type'] === 'ECS Service Action') {
-                // ECS Service Update Event
-                const serviceName = event.detail.service;
-                const updatedVersion = event.detail.desiredTaskDefinition;
-
-                // Update MongoDB based on ECS event
-                // await updateSingleTask(updatedVersion);
-                logger.info(`Updated ECS service ${serviceName}/version ${updatedVersion}`);
-
-            // } else if (event.source === 'aws.events' && event['detail-type'] === 'Scheduled Event') {
-            } else if (event.action === "delete") {
+            if (event.action === "delete") {
                     await deleteOldData();
             } else {
                 logger.info(`Unhandled action: ${event.action}`);

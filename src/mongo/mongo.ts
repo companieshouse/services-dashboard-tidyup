@@ -78,7 +78,7 @@ async function getOldUuids() {
       }  catch (error) {
          logErr(error, 'Error finding uuids:');
    }
-   console.log(uuids);
+   logger.info(`Found these old versions:${JSON.stringify(uuids)}`);
    return uuids;
 }
 
