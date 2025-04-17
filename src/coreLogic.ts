@@ -1,4 +1,3 @@
-import * as config from "./config/index.js";
 import {logger, logErr} from "./utils/logger.js";
 import * as mongo from "./mongo/mongo.js";
 import {UUIDsRecord, deleteProjects}  from "./deptrack/deptrack.js";
