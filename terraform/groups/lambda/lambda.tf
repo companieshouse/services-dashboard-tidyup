@@ -51,18 +51,6 @@ resource "aws_cloudwatch_log_group" "lambda_log_group" {
   retention_in_days = var.lambda_logs_retention_days
 }
 
-# # Create a policy to allow Lambda to access ECS
-# resource "aws_iam_policy" "ecs_operations_policy" {
-#   name   = "${local.lambda_function_name}-ecs-operations-policy"
-#   policy = data.aws_iam_policy_document.ecs_operations_policy.json
-# }
-
-# # Attach the ECS access policy to the Lambda execution role
-# resource "aws_iam_role_policy_attachment" "ecs_operations_policy_attachment" {
-#   role = aws_iam_role.lambda_execution_role.name
-#   policy_arn = "arn:aws:iam::aws:policy/PowerUserAccess"
-# }
-
 # Create the Lambda function
 resource "aws_lambda_function" "node_lambda" {
   depends_on = [aws_cloudwatch_log_group.lambda_log_group]
@@ -126,18 +114,6 @@ resource "aws_lambda_permission" "allow_eventbridge" {
   principal     = "events.amazonaws.com"
   source_arn    = aws_cloudwatch_event_rule.daily_load_all.arn
 }
-
-# // Add a VPC endpoint to allow the Lambda function to access ECS
-# resource "aws_vpc_endpoint" "ecs" {
-#   vpc_id             = data.aws_vpc.vpc.id
-#   service_name       = "com.amazonaws.${var.aws_region}.ecs"
-#   vpc_endpoint_type  = "Interface"
-#   subnet_ids         = local.application_subnet_ids
-#   security_group_ids = [aws_security_group.services_dashboard_lambda_sg.id]
-#   tags = {
-#     Name = "connect-lambda-on-this-vpc-to-ecs"
-#   }
-# }
 
 resource "aws_security_group" "services_dashboard_lambda_sg" {
   name        = "${local.lambda_function_name}-lambda-sg"

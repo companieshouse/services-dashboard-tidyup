@@ -62,7 +62,7 @@ export async function deleteProjects (
 async function deleteProject(uuid: string): Promise<void> {
     const options = {
         ...HttpReqOptionsBase,
-        path: `${config.DT_ENDPOINT_PROJECTS}/${uuid}a`
+        path: `${config.DT_ENDPOINT_PROJECTS}/${uuid}`
     };
 
     return new Promise((resolve, reject) => {

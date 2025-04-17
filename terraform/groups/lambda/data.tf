@@ -64,24 +64,6 @@ data "aws_iam_policy_document" "ssm_access_policy" {
   }
 }
 
-# # Policy to allow Lambda to access ECS
-# data "aws_iam_policy_document" "ecs_operations_policy" {
-#   statement {
-#     sid    = "AllowECSOperations"
-#     effect = "Allow"
-#     actions = [
-#       "ecs:ListClusters",
-#       "ecs:ListTasks",
-#       "ecs:DescribeTasks",
-#       "ecs:DescribeTaskDefinition",
-#       "ecs:DescribeClusters",
-#       "ecs:ListContainerInstances",
-#       "ecs:DescribeContainerInstances",
-#     ]
-#     resources = ["*"]
-#   }
-# }
-
 data "aws_vpc" "vpc" {
   filter {
     name   = "tag:Name"
