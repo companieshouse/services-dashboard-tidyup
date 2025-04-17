@@ -18,7 +18,7 @@ export const DT_SERVER_BASEURL = getEnvironmentValue("DT_SERVER_BASEURL", "depen
 export const DT_HTTP_HEADER = "X-API-Key";
 export const DT_ENDPOINT_PROJECTS = "/api/v1/project";
 export const DT_APIKEY_PARAMSTORE_NAME = getEnvironmentValue("DT_APIKEY_PARAMSTORE_NAME");
-export const DT_TIMEOUT_MS = 8000;
+export const DT_TIMEOUT_MS = 12000;
 
 
 // AWS configuration

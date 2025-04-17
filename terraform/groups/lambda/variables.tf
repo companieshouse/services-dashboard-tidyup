@@ -57,7 +57,7 @@ variable "lambda_memory_size" {
 variable "lambda_timeout_seconds" {
   type        = number
   description = "The amount of time the lambda function is allowed to run before being stopped"
-  default     = 300
+  default     = 600
 }
 
 
