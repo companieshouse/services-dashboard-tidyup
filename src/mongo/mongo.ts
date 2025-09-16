@@ -11,9 +11,17 @@ let database: Db;
 let collection: Collection;
 
 let defaultOldDate = "1970-01-01T00:00:00Z";
+interface EcsEnv {
+  version?: string;
+  gitReleaseDate?: Date | null;
+}
 
-interface EcsVersion {
-   version: string;
+interface EcsDoc {
+  ecs?: {
+    cidev?: EcsEnv;
+    staging?: EcsEnv;
+    live?: EcsEnv;
+  };
 }
 
 async function init() {
@@ -52,11 +60,12 @@ async function getOldUuids() {
          const doc = await cursor.next();
          if (!doc) continue;
 
-          const deployedVersions = new Set<string>([
-            ...(doc.ecs?.cidev || []).map((e: EcsVersion) => e.version),
-            ...(doc.ecs?.staging || []).map((e: EcsVersion) => e.version),
-            ...(doc.ecs?.live || []).map((e: EcsVersion) => e.version),
-          ]);
+
+         const deployedVersions = new Set<string>([
+         doc.ecs?.cidev?.version || "",
+         doc.ecs?.staging?.version || "",
+         doc.ecs?.live?.version || "",
+         ].filter(Boolean)); // removes empty strings
 
          const sortedVersions = [...doc.versions].sort(
            (a, b) => new Date(b.lastBomImport || defaultOldDate).getTime() - new Date(a.lastBomImport || defaultOldDate).getTime()
