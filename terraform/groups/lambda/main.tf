@@ -2,7 +2,7 @@ terraform {
   backend "s3" {
   }
 
-  required_version = "~> 1.3"
+  required_version = "~> 1.3.0"
 
   required_providers {
     aws = {
@@ -26,7 +26,10 @@ module "secrets" {
 
   name_prefix = local.service_name
   kms_key_id  = data.aws_kms_key.kms_key.id
-  secrets     = nonsensitive(merge(local.service_secrets, local.stack_secrets))
+  secrets = {
+    for k in ["mongo_password", "dt_server_apikey"] :
+    k => local.service_secrets[k]
+  }
 }
 
 module "lambda" {
